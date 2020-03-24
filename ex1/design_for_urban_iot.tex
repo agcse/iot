@@ -1,0 +1,132 @@
+\documentclass{article}
+\usepackage{fancyhdr}
+\usepackage{datetime}
+\usepackage{parskip}
+
+\pagestyle{fancy}
+
+\fancyhf{}
+\fancyfoot[L]{University of Oulu. \today}
+
+\lhead{Waste management system}
+\rhead{Page \thepage}
+
+\title{Exercise 1: Design for urban IoT. Waste management system
+\author{Andrei Golubev, Hassan Shaheen}
+\date{\parbox{\linewidth}{\centering
+  \endgraf\bigskip
+  University of Oulu
+  \endgraf\bigskip\today}}
+}
+
+\setlength{\parindent}{0pt}
+
+\begin{document}
+\maketitle
+\newpage
+
+\section{Abstract}
+Household waste has been around throughout the whole humanity lifetime. In current document we
+elaborate an idea of (semi-)automated waste management system that aims to simplify everyday human
+interaction with wastes. Our idea provides a comprehensive solution to waste management problem.
+Multiple tiers of the system are observed to focus both on implementations that are possible today
+and also on some that target future technologies.
+
+\section{Concept}
+
+The problem in focus is the waste and the necessity to manage waste utilization and disposal. As a
+number of people increases, more waste is produced and requirements for waste management become more
+strict and more challenging to satisfy.
+
+Tranditionally, waste management was a manual procedure with different (usually non-optimal) parts.
+For example, a person is required to periodically check whether waste bins are full and most likely
+remove the content of the bins whether they are empty, half-full or completely full. Not only more
+time is spent in this example, there are also additional costs e.g. due to fuel usage (likely a
+vehicle is utilized to collect the waste).
+
+Our solution aims to reduce the time and costs spent on waste collection with further improvement in
+terms of automation. We believe that the system is beneficial mostly to the city residents rather
+than to visitors.
+
+\section{System tiers}
+
+In this section we introduce multiple tiers of the same system so that the reader has better
+understanding of possibilities of each tier. Later chapters are explained in terms of the introduced
+tiers.
+
+\subsection{Tier 1: Smart waste bins}
+
+This tier is the basic tier of the system. The focus of the system in context of this tier is to
+provide "smart" waste bins. The smart waste bin has the following components:
+
+- There is an attached IoT device (e.g. Arduino or other microcontroller) and the device has a
+wireless network connection (WiFi, Internet, etc.)
+
+- The waste bin is able to indentify whether it is full or close to being full. This is achieved by
+a sensor (e.g. infrared) that monitors the number of waste inside the bin and reports the
+measurements to the IoT device for processing
+
+The system consists of a multitude of smart waste bins and a server-side application that aggregates
+information from the waste bins (whether they are full or not) and reports the waste bin statuses to
+the user of the system (here, a human).
+
+\subsection{Tier 2: Locally automated waste management}
+
+This tier is based on the previous Tier 1. More automation takes place in this system by utilizing
+the robots to collect waste from individual smart waste bins. Thus, instead of using a server-side
+application waste bins the information is sent to a local robot which is responsible for waste
+collection and waste delivery to the centralized waste storage (an ultimate waste bin in a sense).
+
+The centralized waste storage is a bigger waste collection place that aggregates waste from multiple
+households. There can exist one such storage per residential area or even one for the whole
+district. The main idea is that such storage is easily accessible by vehicles and requires less time
+to collect the waste from. At this level, the management of the centralized waste storage is manual
+to a certain degree.
+
+\subsection{Tier 3: Globally automated waste management}
+
+As before, this tier is based on the Tier 2 system. The major difference is a leap from
+semi-automated solution to fully automated. The centralized waste storage briefly introduced above
+is now fully automated: we rely on autonomous vehicles and extra robotics to take care of waste
+aggregation and waste disposal by having similar intelligence, as in the case of smart waste bins,
+for the centralized waste storage. The storage monitors the volume of the waste and notifies
+autonomous vehicles when the waste collection is required. Such vehicles are responsible for waste
+transportation from storages to the waste processing plants.
+
+\section{Use case}
+
+Describe the audience or users of the application and area or place where the new solution takes
+place. Describe devices involved (e.g. personal devices, public screens and other user interfaces,
+sensors, computing units, etc). Describe users who need the solution and how they benefit using the
+solutions. Use pictures and drawings to show operation of your solution and/or users using it.
+
+\subsection{Tier 1: Smart waste bins}
+
+% An individual waste bin is self-aware and continuously monitors whether it is full or not. Once it
+% is full, the microcontroller sends a corresponding message over the network. On the other side of
+% the network, the message is read and addressed: if the waste bin is full, there is a need to
+% collect the waste. The solution scales to many waste bins in a similar fashion. Additional logic
+% may be present if there are waste bins of different types (e.g. biowaste, energy waste) or if
+% there are multiple waste bins (e.g. one is full, the other is not).
+
+\subsection{Tier 2: Locally automated waste management}
+
+\subsection{Tier 3: Globally automated waste management}
+
+
+\section{Methodology}
+Propose a technical solution for implementation of your design. How do the participating devices
+communicate? What are sensors and actuators your design uses? What kind of data is collected, and
+how it needs to be processed? Where does the computation happen (in local devices, cloud, somewhere
+else)? Use graphs and images.
+
+\section{Technical details}
+TODO: add solution diagram?
+
+\section{Technical challenges}
+TODO: challenges with bin fulfillment check (imperfections in IR, etc)
+
+\section{Outcomes and conclusion}
+
+
+\end{document}
