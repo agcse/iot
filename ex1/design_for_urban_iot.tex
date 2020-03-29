@@ -95,10 +95,14 @@ transportation from storages to the waste processing plants.
 
 \section{Use case}
 
-Describe the audience or users of the application and area or place where the new solution takes
-place. Describe devices involved (e.g. personal devices, public screens and other user interfaces,
-sensors, computing units, etc). Describe users who need the solution and how they benefit using the
-solutions. Use pictures and drawings to show operation of your solution and/or users using it.
+%Describe the audience or users of the application and area or place where the new solution takes
+%place. Describe devices involved (e.g. personal devices, public screens and other user interfaces,
+%sensors, computing units, etc). Describe users who need the solution and how they benefit using the
+%solutions. Use pictures and drawings to show operation of your solution and/or users using it.
+
+Right now, almost 54 percent of the world population lives in urban areas according to the united nation it will rise to 66 percent by 2050. As the cities are becoming more populated it is putting a lot of stress on the overall infrastructure. Due to this large-scale urbanization volume of waste is increasing; Cities need a smart and efficient waste management system that will replace the current system where most of the things are done manually. 
+
+Our solution is for the city of Oulu and its residents. The system is designed using smart waste bins that contain fill level sensors and transmit the data to the waste management company. Utilizing this data, the waste management company will not need any more manual or routine checks, they can only collect the waste when needed,  They can efficiently assign routes to trucks resulting in less traffic congestion and cutting fuel cost, City will know how much waste is being produced so they can evaluate their infrastructure (putting more bins in the area producing more waste). Residents of Oulu will also benefit from this system, through a mobile app they can find the nearest empty bin and connect with the company if any assistance is required.
 
 \subsection{Tier 1: Smart waste bins}
 
@@ -109,9 +113,15 @@ solutions. Use pictures and drawings to show operation of your solution and/or u
 % may be present if there are waste bins of different types (e.g. biowaste, energy waste) or if
 % there are multiple waste bins (e.g. one is full, the other is not).
 
+Our self-aware bins continuously monitor whether they are full or not. The fill level sensor notifies the central system once a certain level is reached (20\%, 40\%, 80\%, etc.). If the threshold for example 90\% is reached the system will put the bin in the collection queue. This collection queue will help to optimize the route of collection trucks which will cut costs. The level information will help the residents they can see how much a bin is filled and if there is enough space for their waste.
+
 \subsection{Tier 2: Locally automated waste management}
 
+As tier 1 is more automated, we are using robots to collect the waste from residential buildings and putting them to the storage for that residential area, from where it can be collected from trucks and taken into waste processing plants. The system will work the same way, bins will notify the system and instead of putting it into the collection queue of the trucks, a robot will be assigned to that bin. The bins will have a RFID tag through which the robot gets the information about an individual bin. So, it can collect and put back the bin in the right place. These bins are designed in the way that its easier for the robot to attach/pick them. This process will eradicate the need for waste trucks in residential areas reducing noise and air pollution and cutting costs.
+
 \subsection{Tier 3: Globally automated waste management}
+
+Tier 2 will be a fully automated waste management system where human interaction is not required. It is built on top of tier 1, the system will work the same way; bins notifying the system about their level, system assigning the robot to collect the bin, the robot will get the bin and take it to the assigned storage and will put the bin back to residential building. Instead of collection trucks driven by humans now, autonomous vehicles will collect the waste and take it to the central waste processing unit. The fully automated system will be more efficient, environment friendly and less costly for the city. 
 
 
 \section{Methodology}
