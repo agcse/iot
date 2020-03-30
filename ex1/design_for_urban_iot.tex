@@ -58,7 +58,7 @@ tiers.
 \subsection{Tier 1: Smart waste bins}
 
 This tier is the basic tier of the system. The focus of the system in context of this tier is to
-provide "smart" waste bins that are able to measure the waste level inside the bins.
+provide smart waste bins that are able to measure the waste level inside the bins.
 
 The system consists of a multitude of smart waste bins and a server-side application that aggregates
 information from the waste bins (whether they are full or not) and reports the waste bin statuses to
@@ -149,8 +149,8 @@ and less costly for the city.
 
 % Propose a technical solution for implementation of your design. How do the participating devices
 % communicate? What are sensors and actuators your design uses? What kind of data is collected, and
-% how it needs to be processed? Where does the computation happen (in local devices, cloud, somewhere
-% else)? Use graphs and images.
+% how it needs to be processed? Where does the computation happen (in local devices, cloud,
+% somewhere else)? Use graphs and images.
 
 In this section we explore possible technical implementation for each system tier.
 
@@ -166,11 +166,11 @@ We propose to use a simple waste level control system for waste bins. Each bin h
 components:
 
 - There is an attached IoT device (e.g. Arduino or other microcontroller) and the device has a
-wireless network connection (WiFi, Internet, etc.)
+wireless network connection.
 
 - The waste bin is able to indentify whether it is full or close to being full. This is achieved by
 a sensor (e.g. infrared) that monitors the number of waste inside the bin and reports the
-measurements to the IoT device for processing
+measurements to the IoT device for processing.
 
 - Laser transmitter and receiver are used to understand the waste level: transmitter emits signal
 that is caught by the receiver, once the signal stops arriving, it means that something (waste)
@@ -178,8 +178,8 @@ prevents the laser from propagating. Utilizing multiple horizontal transmitter-r
 allows to control whether the waste is uniformly placed inside the bin. Several horizontal levels of
 TRs provide the capability to control waste level in a percentage manner (20\%, 40\%, etc.).
 
-- RFID marker  is added on the outside surface of the bin to address "future" functionality
-available in Tier 2 system.
+- RFID marker  is added on the outside surface of the bin to address future functionality available
+in Tier 2 system.
 
 - Visual markers are installed across the outer faces of the bin to enable automated vision-based
 understanding of the bin shape and structure.
@@ -193,21 +193,27 @@ case, we cannot fully elaborate the technical specification for the robot. Howev
 exist many industrial and household robotics solutions, we can describe requirements:
 
 - The robot must have movement components to be able to move along surfaces in all directions. The
-movement mechanism must be rather robust as different road conditions exist e.g. asphalt, gravel,
-ice.
+movement mechanism must be robust as different road conditions exist e.g. asphalt, gravel, ice.
 
-- Computer vision system must be present so that the robot can detect the specific bin face on which
-RFID tag as well as handles are located. The system does not have to be extraordinary, some simple
-industrial-inspired solution may apply perfectly. Nonetheless, the implementation must be robust due
-to different challenges present in the field (e.g. varying lighting conditions).
-
-- RFID reader must be installed on the robot to read the unique bin data on the bin.
+- RFID reader must be installed on the robot to read the unique bin data.
 
 - The robot must be able to hold and move the waste bin. We suggest to install wheels on the bin
 itself so that the weight of the waste does not affect the required force much. Additionally,
 special handles may be added to the bin so that it is easier for the robot to attach to the bin.
 
-TODO: anything else here? - about centralized waste storage
+- Computer vision system must be present so that the robot can detect the specific bin face on which
+RFID tag as well as handles are located. The system does not have to be an extraordinary one, some
+simple industrial-inspired solution may apply perfectly. Nonetheless, the implementation must be
+robust due to different challenges present in the field (e.g. varying lighting conditions).
+
+- The robot has to be able to communicate with the server via some network protocol. This makes
+possible to monitor robot's location as well as give operational commands if required.
+
+The other component of the current tier is the centralized waste storage. We believe this can be a
+simply enlarged version of the bins in the residential areas. Similar to individual bins, there
+should exist separate sections for different types of waste (biowaste, paper, etc.). In the current
+tier, it is sufficient that a human can operate in such centralized storage to assist robots with
+waste management.
 
 \subsection{Tier 3: Globally automated waste management}
 
@@ -217,15 +223,74 @@ TODO: anything else here? - about centralized waste storage
 \caption{System overview}
 \end{figure}
 
+This tier introduces even more advanced automation: autonomous vehicles that take care of the waste
+at the centralized waste storage. To accompany the automation of transportation, the system must
+also get a more intelligent version of the centralized storage:
+
+- Robots that take care of the local waste must now communicate with the waste storage components.
+Automatic waste transition pipeline must be developed that automates the process of moving the waste
+from the waste bin to the storage's waste container within the centralized waste storage.
+
+- Such waste containers must be manageable by the autonomous vehicles (e.g. trucks). There is more
+room for improvisation in terms of container shape and format as well as vehicle - container
+interaction and we leave this part's implementation as an open question.
+
+As for the vehicles themselves, we believe that some form of trucks is a good option. Such trucks
+must be able to attach/detach the waste container for the successful transportation routine. There
+are two principal scenarios to consider: 1. transportation of the filled container from the
+centralized waste storage to the waste processing plant; 2. transportation of the emptied container
+back to the centralized waste storage. Thus, there must exist at least two separate tasks to be
+carried out by the system together with the autonomous vehicles.
+
+How waste processing plant takes care of the waste is out of the scope of this document. The only
+requirement for our system is to address the specified scenarios: 1. it is possible to deliver the
+waste container to the plant; 2. it is possible to pick the container from the plant. Both scenarios
+must align with the concept of full automatization from the viewpoint of our system.
+
 Figure 2 shows the overview of the whole system with the main components.
 
 \subsection{Communication}
 
+We must also address the arising problem of communication between different components. We believe
+that no specific communication protocol is required to be developed and industry standard solutions
+may be utilized.
+
+- \textbf{Communication between the smart bin and the system} can be done by the means of simple
+networking protocol, for example, using HTTP to communicate waste level to the system's server.
+However, we must address the issue with multiple smart bins located at the same spot. To allow easy
+scalability, the bins first communicate with some proxy server via some low-power local protocol
+(e.g. Bluetooth) and the proxy then forwards messages to the system via the HTTP. In such model, it
+is not required to supply each bin with the internet connection module but only to do so for a proxy
+server. The model starts to resemble a widely used IoT model where each bin is equipped with a
+simple microcontroller (e.g. Arduino style) that is capable to communicate with the proxy and the
+proxy is capable to communicate via the Internet (HTTP) and resembles a portable, low-power computer
+(e.g. Raspberry Pi based).
+
+- \textbf{Communication between the system and the robot} can similarly be carried out through the
+HTTP protocol provided that some messaging scheme is developed. It does not seem sufficient to apply
+the similar approach with the proxy server as done in the bin - system communication as we would
+like to have a capability to monitor robot's location and ensure no issues happen as the robot is
+performing the assigned task.
+
+- \textbf{Communication between the system and the autonomous vehicle} is similar to the
+communication between the system and the robot.
+
+There may exist additional actors in the developed communication scheme, however, it is safe to
+assume that no out-of-the-ordinary protocols have to be used. The amount of network traffic produced
+is rather small as most components do not require to have a real-time information update which
+leaves enough room for selection of the networking technologies (e.g. 3G/4G/5G).
 
 \section{Technical challenges}
-TODO: challenges with bin fulfillment check (imperfections in IR, etc)
+TODO: anything here???
 
 \section{Outcomes and conclusion}
 
+We showed a possible system that aims to automate and reduce costs on the waste management in a
+scope of a city automation. Multiple system tiers are shown targetting both current technology
+situation as well as future opportunities. We believe that Tier 1 system can be developed today.
+Tier 2 system can be prototyped but may require additional investments into R\&D to ensure
+successful product launch. Tier 3 system is targetting the further future, however, not so distant
+as one might think. It seems plausible that Tier 3 system may be prototyped in 5-10 years time and
+then be available on the market in 10-15 years as a fully functional solution.
 
 \end{document}
