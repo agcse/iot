@@ -4,26 +4,31 @@
 \usepackage{parskip}
 \usepackage{graphicx}
 
+\newdateformat{monthyeardate}{\monthname[\THEMONTH], \THEYEAR}
+
 \pagestyle{fancy}
 
 \fancyhf{}
-\fancyfoot[L]{University of Oulu. \today}
+\fancyfoot[L]{University of Oulu. \monthyeardate\today}
 
 \lhead{Waste management system}
 \rhead{Page \thepage}
 
-\title{Exercise 1: Design for urban IoT. Waste management system
-\author{Andrei Golubev, Hassan Shaheen}
+\title{
+Exercise 1: Design for urban IoT. Waste management system
+\bigskip
+\author{Andrei Golubev 2621924 \\ Hassan Shaheen 2600602}
 \date{\parbox{\linewidth}{\centering
   \endgraf\bigskip
-  University of Oulu
-  \endgraf\bigskip\today}}
+  University of Oulu, Oulu, Finland
+  \endgraf\monthyeardate\today}}
 }
 
 \setlength{\parindent}{0pt}
 
 \begin{document}
 \maketitle
+\thispagestyle{empty}
 \newpage
 
 \section{Abstract}
