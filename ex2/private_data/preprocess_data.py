@@ -40,4 +40,14 @@ if __name__ == '__main__':
     #     lambda x: (x - min_longitude) / (max_longitude - min_longitude))
     # locations.to_csv(abspath('relative_locations.csv'))
 
+    # removing index columns
+    # import fileinput
+    # for line in fileinput.input(files=[
+    #         # abspath('data.csv'),
+    #         # abspath('locations.csv'),
+    #         abspath('relative_locations.csv')
+    #     ], inplace=True, backup='.bak'):
+    #     line = ','.join([e for e in line.strip().split(',')[1:]])
+    #     print(line)
+
     pass
