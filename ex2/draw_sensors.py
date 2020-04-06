@@ -4,16 +4,17 @@ import os
 import cv2
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
+import imageio
 
 
 # constants
 CURR_DIR = os.path.dirname(os.path.realpath(__file__))
 POINT_RADIUS = 1
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'  # without microseconds
-Y_CORRECTION = 7
-X_CORRECTION = -85
+Y_CORRECTION = 0
+X_CORRECTION = -115
 
 
 def abspath(file):
@@ -25,22 +26,15 @@ def add_locations(m):
     locations = pd.read_csv(abspath('private_data/relative_locations.csv'))
     rows, cols, _ = m.shape
 
-    y_coords = []
-    for l in locations['latitude']:
-        y_coords.append(round(l * rows))
+    rows += 0
+    cols += 112
 
-    x_coords = []
-    for l in locations['longitude']:
-        x_coords.append(round(l * cols))
-
-    for x, y in zip(x_coords, y_coords):
-        m = cv2.circle(m, (x + X_CORRECTION, rows - y + Y_CORRECTION), POINT_RADIUS, (0, 0, 255),
-            thickness=cv2.FILLED)
-
-    # parse locations into dict
     device_locations = {}
     for _, row in locations.iterrows():
-        device_locations[row['id']] = (rows - round(row['latitude'] * rows), round(row['longitude'] * cols))
+        y_coord = rows - round(row['latitude'] * rows) + Y_CORRECTION
+        x_coord = round(row['longitude'] * cols) + X_CORRECTION
+        device_locations[row['id']] = (y_coord, x_coord)
+        m = cv2.circle(m, (x_coord, y_coord), POINT_RADIUS, (0, 0, 255), thickness=cv2.FILLED)
 
     return m, device_locations
 
@@ -57,17 +51,27 @@ def to_datetime(ts):
 
 
 def get_data(dt=None):
+    """
+    Returns data.csv as pandas.DataFrame.
+    If dt is not None, frame slice is returned for dates [dt[0], dt[1]).
+    """
     data = pd.read_csv(
         abspath('private_data/data.csv'), dtype={'id': str, 'timestamp': str, 'pir': np.int32})
     data['timestamp'] = data['timestamp'].map(lambda ts: to_datetime(ts))
     if dt is None:
         return data
     dt_first, dt_last = dt
-    return data.loc[(data['timestamp'] >= dt_first) & (data['timestamp'] <= dt_last)]
+    return data.loc[(data['timestamp'] >= dt_first) & (data['timestamp'] < dt_last)]
+
+
+def slice_data(data, dt):
+    dt_first, dt_last = dt
+    return data.loc[(data['timestamp'] >= dt_first) & (data['timestamp'] < dt_last)]
 
 
 def add_pir(m, data, device_locations):
     pirs = {}
+    m_with_pir = np.copy(m)
     for _, row in data.iterrows():
         device = row['id']
         pir = pirs.get(device, 0) + row['pir']
@@ -78,10 +82,14 @@ def add_pir(m, data, device_locations):
             print('id not found in locations CSV:', device)
             continue
         y, x = locations  # get latitude, longitude
-        m = cv2.circle(m, (x + X_CORRECTION, y + Y_CORRECTION), POINT_RADIUS + pir, (255, 0, 255),
+        m_with_pir = cv2.circle(m_with_pir, (x, y), POINT_RADIUS + pir, (255, 0, 255),
             thickness=cv2.FILLED)
         pirs[device] = pir
-    return m
+    return m_with_pir
+
+
+def date_dayrange(start):
+    return [start + timedelta(hours=hour) for hour in range(0, 25)]
 
 
 def show_map(m):
@@ -101,12 +109,25 @@ if __name__ == '__main__':
     tellus_map, locations = add_locations(tellus_map)
 
     # get data
-    dt_first = to_datetime('2018-01-27 19:08:28.428')
-    dt_last = to_datetime('2018-01-27 19:11:51.48')
-    data = get_data((dt_first, dt_last))
+    dt_start = to_datetime('2018-01-27 00:00:00')
+    dates = date_dayrange(dt_start)
 
-    # add sensor data
-    tellus_map = add_pir(tellus_map, data, locations)
+    # get full data
+    data = get_data()
+
+    images = []
+    for dt_first, dt_last in zip(dates, dates[1:]):
+        data_slice = slice_data(data, (dt_first, dt_last))
+        # add sensor data
+        image = add_pir(tellus_map, data_slice, locations)
+        # add timestamp text
+        image = cv2.copyMakeBorder(image, 60, 0, 0, 0, cv2.BORDER_CONSTANT, value=(255, 255, 255))
+        time_str = str(dt_first) + ' - ' + str(dt_last)
+        image = cv2.putText(image, time_str, (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+        # append to gif image array
+        images.append(image)
+
+    imageio.mimwrite(abspath('tellus_pir.gif'), images, duration=1.0)
 
     # rendering
-    show_map(tellus_map)
+    # show_map(tellus_map)
