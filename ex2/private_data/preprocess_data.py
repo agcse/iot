@@ -2,6 +2,9 @@
 
 import os
 import pandas as pd
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
+import numpy as np
 
 CURR_DIR = os.path.dirname(os.path.realpath(__file__))
 def abspath(file):
@@ -49,5 +52,41 @@ if __name__ == '__main__':
     #     ], inplace=True, backup='.bak'):
     #     line = ','.join([e for e in line.strip().split(',')[1:]])
     #     print(line)
+
+    # split data into monthly data
+    # DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'  # without microseconds
+    # def to_datetime(ts):
+    #     ts = ts.split('.')
+    #     dt = datetime.strptime(ts[0], DATETIME_FORMAT)
+    #     if len(ts) == 1:  # no microseconds
+    #         return dt
+    #     if ts[1] == '':  # empty microseconds but '.' exists
+    #         return dt
+    #     microsec = int(ts[1]) * 1000
+    #     return datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second, microsec)
+
+    # def get_data():
+    #     data = pd.read_csv(
+    #         abspath('data.csv'), dtype={'id': str, 'timestamp': str, 'pir': np.int32})
+    #     data['timestamp'] = data['timestamp'].map(lambda ts: to_datetime(ts))
+    #     return data
+
+    # def slice_data(data, dt):
+    #     dt_first, dt_last = dt
+    #     return data.loc[(data['timestamp'] >= dt_first) & (data['timestamp'] < dt_last)]
+
+    # data = get_data()
+    # start, end = data.iloc[0,:]['timestamp'], data.iloc[-1,:]['timestamp']
+    # day_iters = int(abs((end - start).days) / 31) + 2
+    # print(day_iters)
+
+    # start = to_datetime('2017-06-26 10:26:02.779')
+    # start = datetime(start.year, start.month, 1)
+    # for _ in range(day_iters):
+    #     end = (start + timedelta(days=31)).replace(day=1)
+    #     print(start, end)
+    #     slice_data(data, (start, end)).to_csv(
+    #         abspath('data/data_' + str(start.year) + '_' + str(start.month) + '.csv'))
+    #     start = end
 
     pass

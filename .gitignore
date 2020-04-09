@@ -6,3 +6,4 @@
 *.synctex.gz
 ex2/private_data/*.csv
 ex2/private_data/*.zip
+ex2/private_data/data/*.csv

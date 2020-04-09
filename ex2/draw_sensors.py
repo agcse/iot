@@ -55,13 +55,17 @@ def get_data(dt=None):
     Returns data.csv as pandas.DataFrame.
     If dt is not None, frame slice is returned for dates [dt[0], dt[1]).
     """
-    data = pd.read_csv(
-        abspath('private_data/data.csv'), dtype={'id': str, 'timestamp': str, 'pir': np.int32})
+    pdtype = {'id': str, 'timestamp': str, 'pir': np.int32}
+    def get_all_data(dt):
+        return pd.read_csv(abspath('private_data/data.csv'), dtype=pdtype)
+    def get_some_data(dt):
+        return pd.read_csv(
+            abspath('private_data/data/data_' + str(dt.year) + '_' + str(dt.month) + '.csv'),
+            dtype=pdtype)
+    get_selector = { True: get_all_data, False: get_some_data }
+    data = get_selector[(dt is None)](dt)
     data['timestamp'] = data['timestamp'].map(lambda ts: to_datetime(ts))
-    if dt is None:
-        return data
-    dt_first, dt_last = dt
-    return data.loc[(data['timestamp'] >= dt_first) & (data['timestamp'] < dt_last)]
+    return data
 
 
 def slice_data(data, dt):
@@ -85,7 +89,16 @@ def add_pir(m, data, device_locations):
         m_with_pir = cv2.circle(m_with_pir, (x, y), POINT_RADIUS + pir, (255, 0, 255),
             thickness=cv2.FILLED)
         pirs[device] = pir
-    return m_with_pir
+
+    min_pir = 0
+    max_pir = 0
+    avg_pir = 0
+    if pirs:
+        min_pir = min(pirs.values())
+        max_pir = max(pirs.values())
+        avg_pir = round(sum(pirs.values()) / len(pirs))
+
+    return m_with_pir, (min_pir, max_pir, avg_pir)
 
 
 def date_dayrange(start):
@@ -113,17 +126,20 @@ if __name__ == '__main__':
     dates = date_dayrange(dt_start)
 
     # get full data
-    data = get_data()
+    data = get_data(dt_start)
 
     images = []
     for dt_first, dt_last in zip(dates, dates[1:]):
         data_slice = slice_data(data, (dt_first, dt_last))
         # add sensor data
-        image = add_pir(tellus_map, data_slice, locations)
+        image, stats = add_pir(tellus_map, data_slice, locations)
         # add timestamp text
-        image = cv2.copyMakeBorder(image, 60, 0, 0, 0, cv2.BORDER_CONSTANT, value=(255, 255, 255))
+        image = cv2.copyMakeBorder(image, 80, 0, 0, 0, cv2.BORDER_CONSTANT, value=(255, 255, 255))
         time_str = str(dt_first) + ' - ' + str(dt_last)
         image = cv2.putText(image, time_str, (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+        min_pir, max_pir, avg_pir = stats
+        pir_str = 'MIN: ' + str(min_pir) + ' | MAX: ' + str(max_pir) + ' | AVG: ' + str(avg_pir)
+        image = cv2.putText(image, pir_str, (0, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
         # append to gif image array
         images.append(image)
 
