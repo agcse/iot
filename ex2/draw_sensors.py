@@ -57,11 +57,11 @@ def get_data(dt=None):
     """
     pdtype = {'id': str, 'timestamp': str, 'pir': np.int32}
     def get_all_data(dt):
-        return pd.read_csv(abspath('private_data/data.csv'), dtype=pdtype)
+        return pd.read_csv(abspath('private_data/data.csv'), dtype=pdtype, engine='c')
     def get_some_data(dt):
         return pd.read_csv(
             abspath('private_data/data/data_' + str(dt.year) + '_' + str(dt.month) + '.csv'),
-            dtype=pdtype)
+            dtype=pdtype, engine='c')
     get_selector = { True: get_all_data, False: get_some_data }
     data = get_selector[(dt is None)](dt)
     data['timestamp'] = data['timestamp'].map(lambda ts: to_datetime(ts))
