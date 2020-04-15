@@ -88,6 +88,8 @@ def add_pir(m, data, device_locations):
         y, x = locations  # get latitude, longitude
         m_with_pir = cv2.circle(m_with_pir, (x, y), POINT_RADIUS + pir, (255, 0, 255),
             thickness=cv2.FILLED)
+        m_with_pir = cv2.circle(m_with_pir, (x, y), POINT_RADIUS + pir, (0, 0, 0),
+            thickness=1)
         pirs[device] = pir
 
     min_pir = 0
@@ -98,6 +100,9 @@ def add_pir(m, data, device_locations):
         max_pir = max(pirs.values())
         avg_pir = round(sum(pirs.values()) / len(pirs))
 
+    alpha = 0.5
+    # alpha blend background with circles
+    m_with_pir = cv2.addWeighted(m, alpha, m_with_pir, (1.0 - alpha), 0.0)
     return m_with_pir, (min_pir, max_pir, avg_pir)
 
 
