@@ -1,0 +1,41 @@
+\documentclass{article}
+\usepackage{fancyhdr}
+\usepackage{datetime}
+\usepackage{parskip}
+\usepackage{graphicx}
+
+\newdateformat{monthyeardate}{\monthname[\THEMONTH], \THEYEAR}
+
+\pagestyle{fancy}
+
+\fancyhf{}
+\fancyfoot[L]{University of Oulu. \monthyeardate\today}
+
+\lhead{IoT Data Analytics}
+\rhead{Page \thepage}
+
+\title{
+Exercise 2: IoT Data Analytics
+\bigskip
+\author{Andrei Golubev 2621924 \\ Hassan Shaheen 2600602}
+\date{\parbox{\linewidth}{\centering
+  \endgraf\bigskip
+  University of Oulu, Oulu, Finland
+  \endgraf\monthyeardate\today}}
+}
+
+\setlength{\parindent}{0pt}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\newpage
+
+\section{Visualization}
+
+\section{Seasonal variations}
+
+\section{Future implications}
+
+
+\end{document}
