@@ -33,6 +33,43 @@ Exercise 2: IoT Data Analytics
 
 \section{Visualization}
 
+Visualization implementation can be divided into two separate tasks: data preparation and actual
+implementation. The first one is required when the data is not ready for the use (e.g. collected
+from different sources or in a wrong format), which is usually the case in real world data
+visualization. The second relies on the use case and research topic and should ideally simplify data
+analysis. In the following subsections we describe briefly the visualization approach details.
+
+\subsection{Data preparation}
+
+There are two primary data files that need to be considered: sensor measurements (temperature, pir,
+co2, etc.) and sensor GPS coordinates.
+
+We perform the following preprocessing on the \textbf{Sensor GPS coordinates} file:
+
+* Move out all unnecessary information (e.g. Tellus area GPS coordinates).
+
+* Convert XLSX format file into plain CSV.
+
+* Unify device id format between this file and sensor measurements file.
+
+* Convert GPS coordinates into relative to Tellus area coordinates (this is a necessary step for
+futher visualization and explained below).
+
+\textbf{Sensor measurements} file is also preprocessed:
+
+* Only required information is left: device ids (required for later localization), timestamps, pir
+readings.
+
+* The whole data file is split into \textit{monthly} data (a single CSV contains 1 month of sensor
+measurements). In our use case, monthly separation is sufficient and the benefits of such a split
+are not to be ignored as we gain reduced the memory footprint during visualization and as well as
+significant speed up during parsing.
+
+With the described actions in mind, we are able to successfully implement visualization that gives
+us a good base for future analysis.
+
+\subsection{Visualization implementation}
+
 \section{Seasonal variations}
 
 \section{Future implications}
