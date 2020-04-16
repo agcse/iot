@@ -70,9 +70,57 @@ us a good base for future analysis.
 
 \subsection{Visualization implementation}
 
+We visualize the sensor measurements (PIR data) by drawing it on a 2D image. This is done via a
+mapping from GPS coordinates of sensors that are converted into relative to Tellus area and then
+converted into image coordinates relative to used Tellus map found at [1]. Figures 1 and 2 show the
+map and the corresponding area annotation.
+
+We draw sensor layer on top of the image-based map, with sensors by default being represented by
+pixel dots (see Figure 3.).
+
+To visualize PIR measurements we use simple transparent circles where the radius of the circle is
+proportional to the PIR number. To represent measurements over time, we bundle individual 2D Tellus
+map images (with sensor data layer) into a GIF. We use \textit{1 hour} time precision so any two
+consecutive maps (images) in the GIF differ by one hour and thus the PIR data for the whole hour is
+aggregated into a single image. Figure 4 shows snapshots from the GIF for some random time period.
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=90mm]{./tellus_map.png}
+  \caption{Tellus map. Modified [1]}
+\end{figure}
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=90mm]{./tellus_map_annotation.png}
+  \caption{Tellus map annotation [1]}
+\end{figure}
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=90mm]{./tellus_map_sensor_locations.png}
+  \caption{Tellus map with sensor locations}
+\end{figure}
+
+\begin{figure}[ht!]
+  \centering
+  \begin{minipage}{.5\textwidth}
+    \centering
+    \includegraphics[width=.95\linewidth]{./tellus_map_sensor_data_1.png}
+  \end{minipage}%
+  \begin{minipage}{.5\textwidth}
+    \centering
+    \includegraphics[width=.95\linewidth]{./tellus_map_sensor_data_2.png}
+  \end{minipage}
+  \caption{Tellus map snapshots with sensor measurements layer added}
+\end{figure}
+
 \section{Seasonal variations}
 
 \section{Future implications}
 
+\section{References}
+
+1. Tellus general description and map. URL: https://www.oulu.fi/tellusarena/description-map
 
 \end{document}
