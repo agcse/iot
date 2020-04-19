@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
 import os
+import sys
+from datetime import datetime, timedelta
+
 import cv2
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import datetime, timedelta
 import numpy as np
 import imageio
 
@@ -109,6 +111,20 @@ def add_pir(m, data, device_locations):
 def date_dayrange(start):
     return [start + timedelta(hours=hour) for hour in range(0, 25)]
 
+def trivial_no_skip(v):
+    return False
+
+def date_range(start, end, delta_function, skip_function=trivial_no_skip):
+    dt = start
+    dates = []
+    while dt >= start and dt <= end:
+        curr = dt
+        dt = dt + delta_function()
+        if skip_function(curr):  # skip date according to function
+            continue
+        dates.append(curr)
+    return dates
+
 
 def show_map(m):
     plt.figure(figsize=(15,8))
@@ -129,6 +145,9 @@ if __name__ == '__main__':
     # get data
     dt_start = to_datetime('2018-01-27 00:00:00')
     dates = date_dayrange(dt_start)
+    # dt_end = to_datetime('2018-01-01 00:00:00')
+    # dates = date_range(dt_start, dt_end, lambda: timedelta(hours=2),
+    #     lambda x: x.hour < 7 or x.hour > 22)
 
     # get full data
     data = get_data(dt_start)
