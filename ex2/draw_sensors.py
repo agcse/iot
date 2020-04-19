@@ -111,8 +111,10 @@ def add_pir(m, data, device_locations):
 def date_dayrange(start):
     return [start + timedelta(hours=hour) for hour in range(0, 25)]
 
+
 def trivial_no_skip(v):
     return False
+
 
 def date_range(start, end, delta_function, skip_function=trivial_no_skip):
     dt = start
@@ -134,6 +136,19 @@ def show_map(m):
     plt.show()
 
 
+def save_as_gif(images):
+    imageio.mimwrite(abspath('tellus_pir.gif'), images, duration=1.0)
+
+
+def save_as_avi(images):
+    shape = images[0].shape
+    writer = cv2.VideoWriter(abspath('tellus_pir.avi'), 0, 1, (shape[1], shape[0]))
+    for image in images:
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        writer.write(image)
+    writer.release()
+
+
 if __name__ == '__main__':
     # reading and color convert to RGB
     tellus_map = cv2.imread(abspath('tellus_map.png'))
@@ -143,11 +158,10 @@ if __name__ == '__main__':
     tellus_map, locations = add_locations(tellus_map)
 
     # get data
-    dt_start = to_datetime('2018-01-27 00:00:00')
-    dates = date_dayrange(dt_start)
-    # dt_end = to_datetime('2018-01-01 00:00:00')
-    # dates = date_range(dt_start, dt_end, lambda: timedelta(hours=2),
-    #     lambda x: x.hour < 7 or x.hour > 22)
+    dt_start = to_datetime('2018-08-01 07:00:00')
+    dt_end = to_datetime('2018-09-01 07:00:00')
+    dates = date_range(dt_start, dt_end, lambda: timedelta(hours=4),
+        lambda x: x.hour < 7 or x.hour > 22)
 
     # get full data
     data = get_data(dt_start)
@@ -167,7 +181,9 @@ if __name__ == '__main__':
         # append to gif image array
         images.append(image)
 
-    imageio.mimwrite(abspath('tellus_pir.gif'), images, duration=1.0)
+    # save_as_gif(images)
+
+    save_as_avi(images)
 
     # rendering
     # show_map(tellus_map)
