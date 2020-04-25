@@ -29,20 +29,18 @@ if __name__ == '__main__':
         local_address = 1  # empty local address due to "single adapter" model
         print("Available port:", bluetooth.PORT_ANY)
         socket.bind(("", bluetooth.PORT_ANY))
+        socket.listen(1)
+
+        uuid = "1e0ca4ea-299d-4335-93eb-27fcfe7fa848"
+        bluetooth.advertise_service(socket, "Desktop controls service", service_id=uuid,
+            service_classes=[uuid, bluetooth.SERIAL_PORT_CLASS],
+            profiles=[bluetooth.SERIAL_PORT_PROFILE])
 
         accepted = False
         # 1. accept a connection
-        while not accepted:
-            socket.listen(1)
-            client_socket, address = socket.accept()
-            handshake = str(client_socket.recv(1024))
-            print("Received connection from", address)
-            if handshake != UNIQUE_HANDSHAKE_HASH:
-                print("Bad handshake")
-                client_socket.close()
-                continue
-            accepted = (handshake == UNIQUE_HANDSHAKE_HASH)
-            print("Good handshake")
+        client_socket, address = socket.accept()
+        handshake = str(client_socket.recv(1024))
+        print("Received connection from", address)
 
         # 2. listen to commands indefinitely
         while True:
@@ -53,6 +51,7 @@ if __name__ == '__main__':
         if client_socket is not None:
             client_socket.close()
         if socket is not None:
+            bluetooth.stop_advertising(socket)
             socket.close()
 
     nearby_devices = bluetooth.discover_devices(lookup_names=True)
