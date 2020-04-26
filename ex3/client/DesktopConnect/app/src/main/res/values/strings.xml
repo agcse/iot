@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">DesktopConnect</string>
+    <string name="locateButton">Locate Device</string>
+    <string name="helloWorld">Hello World!</string>
+    <string name="devices">Devices:</string>
+    <string name="desktop_controls">Desktop Controls:</string>
+    <string name="play_pause">Play/Pause</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+</resources>

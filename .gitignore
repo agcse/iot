@@ -7,3 +7,6 @@
 ex2/private_data/*.csv
 ex2/private_data/*.zip
 ex2/private_data/data/*.csv
+ex3/**/*.jar
+ex3/**/*.apk
+ex3/**/.idea/

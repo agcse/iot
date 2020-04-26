@@ -1,2 +1,2 @@
 pynput
-pybluez
+PyBluez-win10
