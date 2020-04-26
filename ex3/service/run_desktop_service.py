@@ -3,8 +3,6 @@
 import pynput
 import bluetooth
 
-import PyQt5 as qt
-
 class WinKeyCodes:
     """
     Enumeration class for various virtual keyboard keys on Windows.
@@ -42,11 +40,13 @@ def get_code(text):
     }
     return get_code.codes.get(text, None)
 
+
 def press_release(key_code):
     play_key = pynput.keyboard.KeyCode(vk=WinKeyCodes.PLAY_PAUSE)
     virtual_keyboard = pynput.keyboard.Controller()
     virtual_keyboard.press(play_key)
     virtual_keyboard.release(play_key)
+
 
 if __name__ == '__main__':
     socket, client_socket = None, None
