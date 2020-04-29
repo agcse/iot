@@ -42,7 +42,7 @@ def get_code(text):
 
 
 def press_release(key_code):
-    play_key = pynput.keyboard.KeyCode(vk=WinKeyCodes.PLAY_PAUSE)
+    play_key = pynput.keyboard.KeyCode(vk=key_code)
     virtual_keyboard = pynput.keyboard.Controller()
     virtual_keyboard.press(play_key)
     virtual_keyboard.release(play_key)
@@ -61,25 +61,30 @@ if __name__ == '__main__':
             service_classes=[uuid, bluetooth.SERIAL_PORT_CLASS],
             profiles=[bluetooth.SERIAL_PORT_PROFILE])
 
-        socket.listen(1)
-        # 1. accept a connection
-        client_socket, address = socket.accept()
-        print("Received connection from", address)
-
-        socket.setblocking(True)
-        # 2. listen to commands indefinitely
         while True:
-            message = client_socket.recv(128)
-            message = message.decode('utf-8').strip()
-            if not message:
-                continue
-            print("Received message:", message)
+            socket.listen(1)
+            # 1. accept a connection
+            client_socket, address = socket.accept()
+            print("Received connection from", address)
 
-            key_code = get_code(message)
-            if key_code is None:
-                continue
+            socket.setblocking(True)
+            # 2. listen to commands indefinitely
+            while True:
+                message = client_socket.recv(128)
+                message = message.decode('utf-8').strip()
+                if not message:
+                    continue
+                print("Received message:", message)
 
-            press_release(key_code)
+                if message == "END_CONNECTION":
+                    print("Ended connection with", address)
+                    break
+
+                key_code = get_code(message)
+                if key_code is None:
+                    continue
+
+                press_release(key_code)
 
     finally:
         # close sockets after all
@@ -88,9 +93,3 @@ if __name__ == '__main__':
         if socket is not None:
             bluetooth.stop_advertising(socket)
             socket.close()
-
-    nearby_devices = bluetooth.discover_devices(lookup_names=True)
-    print("Found {} devices.".format(len(nearby_devices)))
-
-    for addr, name in nearby_devices:
-        print("  {} - {}".format(addr, name))

@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,54 +30,55 @@ public class Locate extends AppCompatActivity {
     private Vector<BluetoothDevice> devices = new Vector<BluetoothDevice>();
     private Semaphore mutex = new Semaphore(1, true);
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        // TODO: discovery stops at some point, see progress bar (unknown reason)
         @Override
         public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    if (device == null) {
-                        return;
-                    }
-                    String deviceName = device.getName();
-                    if (deviceName == null || deviceName.isEmpty()) {
-                        return;
-                    }
-                    String deviceAddr = device.getAddress();
-                    if (deviceAddr == null || deviceAddr.isEmpty()) {
-                        return;
-                    }
-
-                    if (findDevice(deviceName) != null) {
-                        return;
-                    }
-                    devices.add(device);
-
-                    Button deviceButton = new Button(context);
-                    deviceButton.setLayoutParams(
-                            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                                    LinearLayout.LayoutParams.WRAP_CONTENT));
-                    deviceButton.setText(deviceName);
-                    deviceButton.setId(View.NO_ID);
-                    deviceButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            // Stop the discovery first to ensure no data race
-//                            adapter.cancelDiscovery();
-                            Button thisButton = (Button) v;
-                            BluetoothDevice device = findDevice((String) thisButton.getText());
-                            // If failed, continue?
-                            if (device == null) {
-                                return;
-                            }
-
-                            ConnectThread thread = new ConnectThread(device);
-                            thread.start();
-                        }
-                    });
-
-                    LinearLayout layout = (LinearLayout) findViewById(R.id.devices_layout);
-                    layout.addView(deviceButton);
+            ProgressBar progress = findViewById(R.id.locate_progress);
+            progress.setProgress((progress.getProgress() + 1) % progress.getMax());
+            String action = intent.getAction();
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (device == null) {
+                    return;
                 }
+                String deviceName = device.getName();
+                if (deviceName == null || deviceName.isEmpty()) {
+                    return;
+                }
+                String deviceAddr = device.getAddress();
+                if (deviceAddr == null || deviceAddr.isEmpty()) {
+                    return;
+                }
+
+                if (findDevice(deviceName) != null) {
+                    return;
+                }
+                devices.add(device);
+
+                Button deviceButton = new Button(context);
+                deviceButton.setLayoutParams(
+                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT));
+                deviceButton.setText(deviceName);
+                deviceButton.setId(View.NO_ID);
+                deviceButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Button thisButton = (Button) v;
+                        BluetoothDevice device = findDevice((String) thisButton.getText());
+                        // If failed, continue?
+                        if (device == null) {
+                            return;
+                        }
+
+                        ConnectThread thread = new ConnectThread(device);
+                        thread.start();
+                    }
+                });
+
+                LinearLayout layout = findViewById(R.id.devices_layout);
+                layout.addView(deviceButton);
+            }
         }
     };
 
@@ -131,13 +133,12 @@ public class Locate extends AppCompatActivity {
         unregisterReceiver(receiver);
     }
 
-    private void manageConnection(BluetoothSocket socket) {
+    private void startControlActivity(BluetoothSocket socket) {
         try {
             Intent intent = new Intent(this, Control.class);
             ActivityCommunicator.socket = socket;
             startActivity(intent);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.e("LOCATE_START", "Socket's create() method failed", e);
         }
     }
@@ -189,7 +190,7 @@ public class Locate extends AppCompatActivity {
 
             // The connection attempt succeeded. Perform work associated with
             // the connection in a separate thread.
-            manageConnection(socket);
+            startControlActivity(socket);
         }
 
         // Closes the client socket and causes the thread to finish.

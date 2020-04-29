@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,16 +15,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button locate = (Button)findViewById(R.id.locate_button);
+        Button locate = findViewById(R.id.locate_button);
         locate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startLocate(v);
+                startLocateActivity(v);
             }
         });
     }
 
-    protected void startLocate(View view) {
+    private void startLocateActivity(View view) {
         try {
             Intent intent = new Intent(this, Locate.class);
             startActivity(intent);
