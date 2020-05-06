@@ -20,15 +20,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
-import java.util.concurrent.Semaphore;
 
 public class Locate extends AppCompatActivity {
     private UUID uuid = UUID.fromString("1e0ca4ea-299d-4335-93eb-27fcfe7fa848");
-    private BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
     private Vector<BluetoothDevice> devices = new Vector<BluetoothDevice>();
-    private Semaphore mutex = new Semaphore(1, true);
+    private BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         // TODO: discovery stops at some point, see progress bar (unknown reason)
         @Override
@@ -36,48 +35,20 @@ public class Locate extends AppCompatActivity {
             ProgressBar progress = findViewById(R.id.locate_progress);
             progress.setProgress((progress.getProgress() + 1) % progress.getMax());
             String action = intent.getAction();
+            if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                showDialog("Starting discovery...");
+                return;
+            }
+            if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                showDialog("Finishing discovery...");
+                return;
+            }
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if (device == null) {
                     return;
                 }
-                String deviceName = device.getName();
-                if (deviceName == null || deviceName.isEmpty()) {
-                    return;
-                }
-                String deviceAddr = device.getAddress();
-                if (deviceAddr == null || deviceAddr.isEmpty()) {
-                    return;
-                }
-
-                if (findDevice(deviceName) != null) {
-                    return;
-                }
-                devices.add(device);
-
-                Button deviceButton = new Button(context);
-                deviceButton.setLayoutParams(
-                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT));
-                deviceButton.setText(deviceName);
-                deviceButton.setId(View.NO_ID);
-                deviceButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Button thisButton = (Button) v;
-                        BluetoothDevice device = findDevice((String) thisButton.getText());
-                        // If failed, continue?
-                        if (device == null) {
-                            return;
-                        }
-
-                        ConnectThread thread = new ConnectThread(device);
-                        thread.start();
-                    }
-                });
-
-                LinearLayout layout = findViewById(R.id.devices_layout);
-                layout.addView(deviceButton);
+                addDevice(device, context);
             }
         }
     };
@@ -102,26 +73,43 @@ public class Locate extends AppCompatActivity {
             showDialog("Adapter is Null");
             return;
         }
-
         if (!adapter.isEnabled()) {
             Intent enableBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivity(enableBluetoothIntent);
         }
-
-        // Register for broadcasts when a device is discovered
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(receiver, filter);
-
-        int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
-        adapter.startDiscovery();
+        if (adapter.isDiscovering()) {
+            adapter.cancelDiscovery();
+        }
 
         // Make this device discoverable - for pairing/connection
         Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
         startActivity(discoverableIntent);
+
+        int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+        int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+
+        // Register for broadcasts when a device is discovered
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        registerReceiver(receiver, filter);
+
+        Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+        if (pairedDevices.size() > 0) {
+            showDialog("Found paired devices...");
+            for (BluetoothDevice device : pairedDevices) {
+                addDevice(device, this);
+            }
+        } else {
+            adapter.startDiscovery();
+        }
     }
 
     @Override
@@ -148,6 +136,46 @@ public class Locate extends AppCompatActivity {
         builder.setMessage(text);
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void addDevice(BluetoothDevice device, Context context) {
+        String deviceName = device.getName();
+        if (deviceName == null || deviceName.isEmpty()) {
+            return;
+        }
+        String deviceAddr = device.getAddress();
+        if (deviceAddr == null || deviceAddr.isEmpty()) {
+            return;
+        }
+
+        if (findDevice(deviceName) != null) {
+            return;
+        }
+        devices.add(device);
+
+        Button deviceButton = new Button(context);
+        deviceButton.setLayoutParams(
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
+        deviceButton.setText(deviceName);
+        deviceButton.setId(View.NO_ID);
+        deviceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Button thisButton = (Button) v;
+                BluetoothDevice device = findDevice((String) thisButton.getText());
+                // If failed, continue?
+                if (device == null) {
+                    return;
+                }
+
+                ConnectThread thread = new ConnectThread(device);
+                thread.start();
+            }
+        });
+
+        LinearLayout layout = findViewById(R.id.devices_layout);
+        layout.addView(deviceButton);
     }
 
     private class ConnectThread extends Thread {
