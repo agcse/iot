@@ -1,0 +1,179 @@
+\documentclass{article}
+\usepackage{fancyhdr}
+\usepackage{datetime}
+\usepackage{parskip}
+\usepackage{graphicx}
+
+\newdateformat{monthyeardate}{\monthname[\THEMONTH], \THEYEAR}
+
+\pagestyle{fancy}
+
+\fancyhf{}
+\fancyfoot[L]{University of Oulu. \monthyeardate\today}
+
+\lhead{IoT Data Analytics}
+\rhead{Page \thepage}
+
+\title{
+Exercise 3: Small IoT Implementation
+\bigskip
+\author{Andrei Golubev 2621924 \\ Hassan Shaheen 2600602}
+\date{\parbox{\linewidth}{\centering
+  \endgraf\bigskip
+  University of Oulu, Oulu, Finland
+  \endgraf\monthyeardate\today}}
+}
+
+\setlength{\parindent}{0pt}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\newpage
+
+\section{Description of design}
+
+The idea is to control a nearby computer/laptop remotely using an android phone. We have implemented an
+\textbf{Android Bluetooth controller}, which connects to windows PC/Laptop with the server application
+running. In the current implementation, we can control windows media controls like play/pause, etc.
+Using this application users can control any multimedia application running on windows like Spotify
+or similar service running in their browser like Youtube.
+
+\subsection{Objective}
+
+The objective of this application is that the android device can work as a \textbf{generic remote
+controller} for a computer. Even though in current application users can only control limited media
+options, it can be used in things like controlling the mouse with touchpad, changing the volume of
+pc, controlling slide show, etc.  The main purpose is to control your pc remotely, depending upon
+the need it can be used by students for their presentations or by a regular person who just wants to
+change their laptop music without getting up.
+
+\subsection{Design}
+The system has two parts an android application with a controller interface and a server application
+running on windows which interprets the commands sent from the device.
+
+\subsubsection{Android Application}
+The flow of the android application is following.
+
+
+\begin{enumerate}
+\item Users will search for Bluetooth devices
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=.07]{./locate.jpg}
+\end{figure}
+
+\item To locate, the user needs to make the device discoverable,  after successful discovery, the
+application will show the list of two kinds of devices, Ones who are already been paired or are
+available.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=.07]{./discover.jpg}
+\end{figure}
+
+\item User can select his/her computer and the application will connect with the server running on
+windows. The next screen will show four types of controls by pressing these buttons user sends the
+commands to the computer.
+\begin{itemize}
+\item Play/Pause
+\item Next
+\item Previous
+\item Stop
+\end{itemize}
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=.07]{./control.jpg}
+\end{figure}
+
+\end{enumerate}
+
+
+\subsubsection{Windows Server}
+The windows server will receive these commands from android device and interpret them accordingly.
+The user can see which android device is connected and what commands are being sent.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=.3]{./service.png}
+\end{figure}
+
+
+\section{Technical Implementation}
+
+\subsection{Android Application}
+
+For the android application, we are using its Bluetooth library. For Bluetooth-enabled devices to
+transmit data between each other, they must first form a channel of communication using a pairing
+process.
+
+To use Bluetooth features in our application we need mainly two permissions
+android.permission.\textbf{BLUETOOTH} and android.permission.\textbf{ACCESS\textunderscore FINE
+\textunderscore LOCATION}. We prompt the user if any of these permissions are missing. If not, we
+start the discovery process. There are two parts, we show the list of already paired devices or
+start the discovery of available devices using a class named \textbf{   BluetoothAdapter}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=.5]{./discoverDevice.png}
+\end{figure}
+
+
+After we have our device we can connect to the socket on the computer/laptop running our server
+using the same \textbf{UUID} we have it on our server.  For sending commands we have buttons that
+invoke an event with commands when they are clicked.
+
+For example, when “PLAY/PAUSE” button is clicked. It will invoke \textbf{SendMessage()} function
+with the string “PLAY/PAUSE” as a parameter which is then sent to the server and executed. 
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=.5]{./sendMsg.png}
+\end{figure}
+
+\subsection{Windows Server}
+
+For our windows server, we are using \textbf{Python}. There are two main libraries used in this project
+
+\begin{itemize}
+\item \textbf{Pynput} allows controlling the input devices, in our case a computer keyboard
+
+\item \textbf{PyBluez} helps python code to access the host machine Bluetooth resources
+
+\end{itemize}
+
+
+Communication is done using socket programming model, a socket represents an endpoint of a
+communication channel. The first step is to establish a connection using a socket. For that, we need
+a protocol for the socket in our case its \textbf{RFCOMM}. After binding the socket with an
+available port, we start advertising over Bluetooth.
+ 
+The method we are using is \textbf{ Bluetooth.advertise\textunderscore service(socket, UUID)} this
+method takes a socket and UUID. It looks for service with the same UUID to connect (our android
+application).
+
+After the connection is made, we are receiving messages on this port. The messages are in a
+predefined string format. Which are then converted to windows virtual keycodes and interpreted in
+keyboard commands using \textbf{Pynput}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=.5]{./socket.png}
+\end{figure}
+
+For example, If the user press PLAY/PAUSE in an android application a string is received on the
+server, gets converted to windows keycode for PLAY/PAUSE, and then executed using Pynput keyboard
+controller.
+
+
+\section{References}
+
+1. Pynput  URL: https://pypi.org/project/pynput/
+
+2. Pybluez URL: https://github.com/pybluez/pybluez
+
+3. Android Bluetooth URL: https://developer.android.com/guide/topics/connectivity/bluetooth
+
+\end{document}
